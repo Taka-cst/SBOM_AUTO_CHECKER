@@ -21,7 +21,7 @@ RUN pip install --no-cache-dir --upgrade pip setuptools wheel \
 # =======================================
 FROM alpine:latest AS trivy-downloader
 
-ARG TRIVY_VERSION=0.49.1
+ARG TRIVY_VERSION=0.58.2
 RUN apk add --no-cache wget tar \
     && wget -q "https://github.com/aquasecurity/trivy/releases/download/v${TRIVY_VERSION}/trivy_${TRIVY_VERSION}_Linux-64bit.tar.gz" \
     && tar zxf "trivy_${TRIVY_VERSION}_Linux-64bit.tar.gz" -C /usr/local/bin \
