@@ -1,34 +1,34 @@
 # SBOM Auto Checker Setup Script for Windows
 
-Write-Host "SBOM Auto Checker セットアップを開始します..." -ForegroundColor Cyan
+Write-Host "Starting SBOM Auto Checker setup..." -ForegroundColor Cyan
 
-# 1. 環境変数ファイルの作成
+# 1. Create environment file
 if (-Not (Test-Path .env)) {
-    Write-Host ".envファイルを作成しています..." -ForegroundColor Yellow
+    Write-Host "Creating .env file..." -ForegroundColor Yellow
     Copy-Item .env.example .env
-    Write-Host ".envファイルが作成されました" -ForegroundColor Green
-    Write-Host ".envファイルを編集して、必要な設定を行ってください" -ForegroundColor Yellow
+    Write-Host ".env file created successfully" -ForegroundColor Green
+    Write-Host "Please edit .env file and configure the required settings" -ForegroundColor Yellow
 } else {
-    Write-Host ".envファイルは既に存在します" -ForegroundColor Green
+    Write-Host ".env file already exists" -ForegroundColor Green
 }
 
-# 2. シェルスクリプトの改行コード修正（Docker内で実行されるため）
-Write-Host "シェルスクリプトの改行コードをLFに変換しています..." -ForegroundColor Yellow
+# 2. Fix shell script line endings
+Write-Host "Converting shell scripts to LF line endings..." -ForegroundColor Yellow
 Get-ChildItem -Recurse -Filter "*.sh" | ForEach-Object {
     $content = Get-Content $_.FullName -Raw
     if ($content -match "`r`n") {
         $content = $content -replace "`r`n", "`n"
         [System.IO.File]::WriteAllText($_.FullName, $content, [System.Text.UTF8Encoding]::new($false))
-        Write-Host "  OK: $($_.Name)" -ForegroundColor Gray
+        Write-Host "  Fixed: $($_.Name)" -ForegroundColor Gray
     }
 }
-Write-Host "改行コードの変換が完了しました" -ForegroundColor Green
+Write-Host "Line ending conversion completed" -ForegroundColor Green
 
-# 3. Dockerのバージョン確認
-Write-Host "Docker環境を確認しています..." -ForegroundColor Yellow
+# 3. Check Docker version
+Write-Host "Checking Docker environment..." -ForegroundColor Yellow
 try {
     $dockerVersion = docker --version
-    Write-Host "Docker環境が確認できました" -ForegroundColor Green
+    Write-Host "Docker environment verified" -ForegroundColor Green
     Write-Host "  $dockerVersion" -ForegroundColor Gray
     
     try {
@@ -39,31 +39,31 @@ try {
         Write-Host "  $composeVersion" -ForegroundColor Gray
     }
 } catch {
-    Write-Host "Dockerがインストールされていません" -ForegroundColor Red
-    Write-Host "https://docs.docker.com/desktop/install/windows-install/ からインストールしてください" -ForegroundColor Yellow
+    Write-Host "Docker is not installed" -ForegroundColor Red
+    Write-Host "Please install from: https://docs.docker.com/desktop/install/windows-install/" -ForegroundColor Yellow
     exit 1
 }
 
-# 4. 必要なディレクトリの作成
-Write-Host "必要なディレクトリを作成しています..." -ForegroundColor Yellow
+# 4. Create required directories
+Write-Host "Creating required directories..." -ForegroundColor Yellow
 @("uploads", "backups") | ForEach-Object {
     if (-Not (Test-Path $_)) {
         New-Item -ItemType Directory -Path $_ | Out-Null
     }
 }
-Write-Host "ディレクトリの作成が完了しました" -ForegroundColor Green
+Write-Host "Directory creation completed" -ForegroundColor Green
 
-# 5. セットアップ完了
+# 5. Setup complete
 Write-Host ""
-Write-Host "セットアップが完了しました!" -ForegroundColor Green
+Write-Host "Setup completed successfully!" -ForegroundColor Green
 Write-Host ""
-Write-Host "次のステップ:" -ForegroundColor Cyan
-Write-Host "1. .envファイルを編集して設定を行ってください:" -ForegroundColor White
+Write-Host "Next steps:" -ForegroundColor Cyan
+Write-Host "1. Edit .env file and configure settings:" -ForegroundColor White
 Write-Host "   notepad .env" -ForegroundColor Gray
 Write-Host ""
-Write-Host "2. アプリケーションを起動してください:" -ForegroundColor White
+Write-Host "2. Start the application:" -ForegroundColor White
 Write-Host "   docker-compose up -d" -ForegroundColor Gray
 Write-Host ""
-Write-Host "3. ブラウザでアクセスしてください:" -ForegroundColor White
+Write-Host "3. Access in your browser:" -ForegroundColor White
 Write-Host "   http://localhost:3000" -ForegroundColor Gray
 Write-Host ""
