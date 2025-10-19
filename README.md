@@ -20,7 +20,94 @@ SBOM (Software Bill of Materials) ファイルをアップロードし、脆弱�
 
 ## 🚀 クイックスタート
 
-### Windows環境でのセットアップ
+### 📖 初めての方へ
+
+```
+┌─────────────────────────────────────────┐
+│  1️⃣ git clone でリポジトリをダウンロード │
+└─────────────────────────────────────────┘
+                  ↓
+┌─────────────────────────────────────────┐
+│  2️⃣ .\setup.ps1 でセットアップ(初回のみ) │
+│     - .envファイル作成                   │
+│     - 改行コード修正                     │
+│     - Docker環境チェック                 │
+└─────────────────────────────────────────┘
+                  ↓
+┌─────────────────────────────────────────┐
+│  3️⃣ .\start.ps1 でアプリ起動            │
+│     - BuildKit高速ビルド                │
+│     - 全サービス自動起動                 │
+└─────────────────────────────────────────┘
+                  ↓
+┌─────────────────────────────────────────┐
+│  🌐 http://localhost:3000 でアクセス!   │
+└─────────────────────────────────────────┘
+```
+
+### 🎯 超簡単! 3ステップで起動
+
+#### 1. リポジトリをクローン
+```bash
+git clone https://github.com/Taka-cst/SBOM_AUTO_CHECKER
+cd SBOM_AUTO_CHECKER
+```
+
+#### 2. セットアップを実行 (初回のみ)
+```powershell
+# Windows
+.\setup.ps1
+
+# Linux/Mac
+chmod +x setup.sh
+./setup.sh
+```
+
+このスクリプトが自動的に:
+- ✅ `.env`ファイルを作成
+- ✅ 改行コード(CRLF→LF)を修正
+- ✅ Docker環境をチェック
+- ✅ 必要なディレクトリを作成
+
+#### 3. アプリケーションを起動
+```powershell
+# Windows
+.\start.ps1
+
+# Linux/Mac
+./start.sh
+```
+
+**たったこれだけ!** BuildKitによる高速ビルドで起動します 🚀
+
+アクセスURL:
+- 🌐 フロントエンド: http://localhost:3000
+- 📡 バックエンドAPI: http://localhost:8000
+- 📚 API ドキュメント: http://localhost:8000/docs
+
+### その他のコマンド
+
+```powershell
+# Windows
+.\start.ps1 build      # イメージをビルド
+.\start.ps1 up         # サービスを起動(デフォルト)
+.\start.ps1 down       # サービスを停止
+.\start.ps1 restart    # サービスを再起動
+.\start.ps1 logs       # ログを表示
+.\start.ps1 clean      # 完全クリーンアップ(データも削除)
+
+# Linux/Mac
+./start.sh build
+./start.sh up
+./start.sh down
+./start.sh restart
+./start.sh logs
+./start.sh clean
+```
+
+### 従来の方法でセットアップする場合
+
+#### Windows環境
 
 ```powershell
 # リポジトリのクローン
@@ -40,7 +127,7 @@ docker-compose up -d
 # http://localhost:3000
 ```
 
-### Linux/Mac環境でのセットアップ
+#### Linux/Mac環境
 
 ```bash
 # リポジトリのクローン
@@ -63,13 +150,26 @@ docker-compose up -d
 # http://localhost:3000
 ```
 
-### ⚠️ トラブルシューティング
+## ⚠️ トラブルシューティング
 
-**シェルスクリプトが見つからないエラーが出る場合:**
+### `.env file not found!` というエラーが出る
+
+まず`setup.ps1`または`setup.sh`を実行してください:
+
+```powershell
+# Windows
+.\setup.ps1
+
+# Linux/Mac
+./setup.sh
+```
+
+### シェルスクリプトが見つからないエラーが出る場合
 
 Windowsでクローンした場合、改行コードがCRLFになっている可能性があります。
-以下のコマンドで修正できます:
+`setup.ps1`または`setup.sh`を実行すると自動的に修正されます。
 
+手動で修正する場合:
 ```bash
 # Linux/Mac環境で実行
 find . -name "*.sh" -type f -exec dos2unix {} \;
@@ -78,11 +178,17 @@ find . -name "*.sh" -type f -exec dos2unix {} \;
 find . -name "*.sh" -type f -exec sed -i 's/\r$//' {} \;
 ```
 
-**.envファイルが読み込まれない場合:**
+### .envファイルが読み込まれない場合
 
-- .envファイルが正しく作成されているか確認
-- 改行コードがLFになっているか確認
-- 必要な環境変数がすべて設定されているか確認
+- ✅ `.env`ファイルが正しく作成されているか確認
+- ✅ 改行コードがLFになっているか確認
+- ✅ 必要な環境変数がすべて設定されているか確認
+
+### Dockerが起動しない場合
+
+- ✅ Docker Desktopがインストールされているか確認
+- ✅ Docker Desktopが起動しているか確認
+- ✅ WSL2が有効になっているか確認(Windows)
 
 ## 📚 ドキュメント
 
@@ -92,6 +198,7 @@ find . -name "*.sh" -type f -exec sed -i 's/\r$//' {} \;
 - [ユーザーマニュアル](docs/USER_MANUAL.md)
 - [運用・保守ガイド](docs/OPERATIONS.md)
 - [開発ガイド](docs/DEVELOPMENT.md)
+- [Docker高速化ガイド](docs/DOCKER_OPTIMIZATION.md) ⚡ New!
 
 ## 🏗️ プロジェクト構造
 

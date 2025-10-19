@@ -55,15 +55,17 @@ Write-Host "Directory creation completed" -ForegroundColor Green
 
 # 5. Setup complete
 Write-Host ""
-Write-Host "Setup completed successfully!" -ForegroundColor Green
+Write-Host "✅ Setup completed successfully!" -ForegroundColor Green
 Write-Host ""
 Write-Host "Next steps:" -ForegroundColor Cyan
-Write-Host "1. Edit .env file and configure settings:" -ForegroundColor White
+Write-Host "1. (Optional) Edit .env file to customize settings:" -ForegroundColor White
 Write-Host "   notepad .env" -ForegroundColor Gray
 Write-Host ""
 Write-Host "2. Start the application:" -ForegroundColor White
-Write-Host "   docker-compose up -d" -ForegroundColor Gray
+Write-Host "   .\start.ps1" -ForegroundColor Gray
 Write-Host ""
 Write-Host "3. Access in your browser:" -ForegroundColor White
-Write-Host "   http://localhost:3000" -ForegroundColor Gray
+Write-Host "   🌐 Frontend:  http://localhost:3000" -ForegroundColor Gray
+Write-Host "   📡 Backend:   http://localhost:8000" -ForegroundColor Gray
+Write-Host "   📚 API Docs:  http://localhost:8000/docs" -ForegroundColor Gray
 Write-Host ""

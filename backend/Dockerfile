@@ -1,42 +1,69 @@
-# Python 3.11ベースイメージ
+# =======================================
+# Stage 1: ビルドステージ (依存関係とツールのインストール)
+# =======================================
+FROM python:3.11-slim AS builder
+
+# 作業ディレクトリの設定
+WORKDIR /app
+
+# ビルドに必要な最小限のパッケージをインストール
+RUN apt-get update && apt-get install -y --no-install-recommends \
+    gcc \
+    && rm -rf /var/lib/apt/lists/*
+
+# Python依存関係のインストール (wheelを使用して高速化)
+COPY requirements.txt .
+RUN pip install --no-cache-dir --upgrade pip setuptools wheel \
+    && pip wheel --no-cache-dir --wheel-dir /app/wheels -r requirements.txt
+
+# =======================================
+# Stage 2: Trivyダウンロードステージ (並列ビルドで高速化)
+# =======================================
+FROM alpine:latest AS trivy-downloader
+
+ARG TRIVY_VERSION=0.49.1
+RUN apk add --no-cache wget tar \
+    && wget -q "https://github.com/aquasecurity/trivy/releases/download/v${TRIVY_VERSION}/trivy_${TRIVY_VERSION}_Linux-64bit.tar.gz" \
+    && tar zxf "trivy_${TRIVY_VERSION}_Linux-64bit.tar.gz" -C /usr/local/bin \
+    && chmod +x /usr/local/bin/trivy \
+    && rm "trivy_${TRIVY_VERSION}_Linux-64bit.tar.gz"
+
+# =======================================
+# Stage 3: 本番ステージ (最小構成)
+# =======================================
 FROM python:3.11-slim
 
 # 作業ディレクトリの設定
 WORKDIR /app
 
-# システムパッケージの更新とインストール
-RUN apt-get update && apt-get install -y \
-    gcc \
+# 実行時に必要な最小限のパッケージのみインストール
+RUN apt-get update && apt-get install -y --no-install-recommends \
     postgresql-client \
     curl \
-    wget \
-    tar \
-    && rm -rf /var/lib/apt/lists/*
+    && rm -rf /var/lib/apt/lists/* \
+    && apt-get clean
 
-# Trivyのインストール (バイナリダウンロード)
-RUN TRIVY_VERSION=$(curl -s "https://api.github.com/repos/aquasecurity/trivy/releases/latest" | grep '"tag_name":' | sed -E 's/.*"v([^"]+)".*/\1/') \
-    && wget -q "https://github.com/aquasecurity/trivy/releases/download/v${TRIVY_VERSION}/trivy_${TRIVY_VERSION}_Linux-64bit.tar.gz" \
-    && tar zxvf "trivy_${TRIVY_VERSION}_Linux-64bit.tar.gz" \
-    && mv trivy /usr/local/bin/ \
-    && rm "trivy_${TRIVY_VERSION}_Linux-64bit.tar.gz" \
-    && chmod +x /usr/local/bin/trivy
+# ビルドステージからwheelをコピーしてインストール (超高速!)
+COPY --from=builder /app/wheels /wheels
+RUN pip install --no-cache-dir --upgrade pip \
+    && pip install --no-cache-dir --no-index --find-links=/wheels /wheels/* \
+    && rm -rf /wheels
+
+# Trivyダウンロードステージからバイナリをコピー
+COPY --from=trivy-downloader /usr/local/bin/trivy /usr/local/bin/trivy
 
 # Trivyキャッシュディレクトリの作成
 RUN mkdir -p /.cache/trivy && chmod -R 777 /.cache/trivy
 ENV TRIVY_CACHE_DIR=/.cache/trivy
 
-# 依存関係のコピーとインストール
-COPY requirements.txt .
-RUN pip install --no-cache-dir -r requirements.txt
+# アップロードディレクトリの作成
+RUN mkdir -p /app/uploads
 
-# アプリケーションコードのコピー
+# アプリケーションコードのコピー (最後にコピーしてキャッシュを最大活用)
 COPY . .
 
 # エントリポイントスクリプトに実行権限を付与
 RUN chmod +x /app/entrypoint.sh
-
-# アップロードディレクトリの作成
-RUN mkdir -p /app/uploads
 
 # エントリポイント設定
 ENTRYPOINT ["/app/entrypoint.sh"]
