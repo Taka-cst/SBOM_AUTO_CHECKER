@@ -20,10 +20,18 @@ SBOM (Software Bill of Materials) ファイルをアップロードし、脆弱�
 
 ## 🚀 クイックスタート
 
+### Windows環境でのセットアップ
+
 ```powershell
 # リポジトリのクローン
 git clone <repository-url>
 cd SBOM_AUTO_CHECKER
+
+# 環境変数ファイルの作成
+Copy-Item .env.example .env
+
+# .envファイルを編集して必要な設定を行う
+notepad .env
 
 # Docker Composeで起動
 docker-compose up -d
@@ -31,6 +39,50 @@ docker-compose up -d
 # ブラウザでアクセス
 # http://localhost:3000
 ```
+
+### Linux/Mac環境でのセットアップ
+
+```bash
+# リポジトリのクローン
+git clone <repository-url>
+cd SBOM_AUTO_CHECKER
+
+# 環境変数ファイルの作成
+cp .env.example .env
+
+# .envファイルを編集して必要な設定を行う
+nano .env
+
+# シェルスクリプトに実行権限を付与（重要！）
+find . -name "*.sh" -type f -exec chmod +x {} \;
+
+# Docker Composeで起動
+docker-compose up -d
+
+# ブラウザでアクセス
+# http://localhost:3000
+```
+
+### ⚠️ トラブルシューティング
+
+**シェルスクリプトが見つからないエラーが出る場合:**
+
+Windowsでクローンした場合、改行コードがCRLFになっている可能性があります。
+以下のコマンドで修正できます:
+
+```bash
+# Linux/Mac環境で実行
+find . -name "*.sh" -type f -exec dos2unix {} \;
+
+# または
+find . -name "*.sh" -type f -exec sed -i 's/\r$//' {} \;
+```
+
+**.envファイルが読み込まれない場合:**
+
+- .envファイルが正しく作成されているか確認
+- 改行コードがLFになっているか確認
+- 必要な環境変数がすべて設定されているか確認
 
 ## 📚 ドキュメント
 
